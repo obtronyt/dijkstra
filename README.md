@@ -10,6 +10,7 @@ path=dijkstra(1,25,&count);
 for(i=0;i<=count;i++){  
 printf("%c\n",path[i]);  
 }  
+free(path)  
 return 0;  
 }  
 
