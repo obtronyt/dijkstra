@@ -2,6 +2,7 @@
 Dijskstra's for a grid using C  
 # USAGE    
 #include<stdio.h>  
+#include<stdlib.h>  
 #include"Dijkstras.c"  
 int main(){  
 char *path;  
