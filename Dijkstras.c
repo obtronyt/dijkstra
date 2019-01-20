@@ -1,3 +1,4 @@
+#include<string.h>
 #include<stdio.h>
 #include<stdlib.h>
 #define INF 999
@@ -5,7 +6,8 @@
 #define FALSE 0
 void adjacent(int x1,int y1,int adj[4][2]);
 int min_dis(int dist[], int included[]);
-void sh_path(int start, int end);
+char * sh_path(int start, int end,int *);
+char* dijkstra(int start,int end,int *count);
 
 int grid[5][5]={
     {1,2,3,4,5},
@@ -13,7 +15,8 @@ int grid[5][5]={
     {11,12,13,14,15},
     {16,17,18,19,20},
     {21,22,23,24,25}};
-
+int transf[26]={99,20,21,22,23,24,15,16,17,18,19,10,11,12,13,14,5,6,7,8,9,0,1,2,3,4};
+int p_nx=0,p_ny=0,n_nx=0,n_ny=0;
 void adjacent(int x1,int y1,int adj[4][2]){
     int i=0,x=0,y=0;
     int key_x[4]={-1,0,1,0};//N E S W
@@ -41,11 +44,97 @@ int min_dis(int dist[], int included[]){
     }
     return min_index;
 }
-void sh_path(int start, int end){
+char allign(int turn_count){
+turn_count=turn_count%3;
+if(turn_count==2||turn_count==-2)
+return 'U';
+else if(turn_count==1||turn_count==-3)
+return 'L';
+else if(turn_count==-1||turn_count==3)
+return 'R';
+else
+return 'N';
+}
+char rotate(int current,int next,int *turn_count){
+     int dir_x,dir_y;
+     dir_x=(current/5)-(next/5);
+     dir_y=(current%5)-(next%5);
+     if(dir_y==0){
+        if(dir_x<0){
+       // printf("Uturn\n");
+        *turn_count+=2;
+        return 'U';
+        p_nx=1;
+        p_ny=0;
+        }
+        else
+        {
+        //printf("NC\n");
+         return 'N';
+        }
+     }
+     else if(dir_x==0)
+     {
+      if(dir_y<0){
+      //printf("Right\n");
+      *turn_count=*turn_count+1;
+      p_nx=0;
+      p_ny=1;
+      return 'R';
+      }
+      else{
+      //printf("Left\n");
+      p_nx=0;
+      p_ny=-1;
+      *turn_count=*turn_count-1;
+      return 'L';
+      }
+    }
+}
+char direction(int current,int next,int *turn_count){
+     n_nx=(next/5)-(current/5);
+     n_ny=(next%5)-(current%5);
+     char out='o';
+     if(n_nx==p_nx && n_ny==p_ny){
+     out='n';
+     }
+     else if(n_nx==(-p_nx) && n_ny==(-p_ny)){
+     *turn_count+=2;
+     out='u';
+     }
+     else if(p_nx!=0){
+     if((p_nx==n_ny )){
+     *turn_count+=-1;
+     out= 'l';
+     }
+     else{
+     *turn_count+=1;
+     out= 'r';
+     }
+
+     }
+     else if(p_ny!=0){
+     if(p_ny==n_nx){
+     *turn_count+=1;
+     out= 'r';
+     }
+     else{
+     *turn_count-=1;
+     out= 'l';
+     }
+      }
+    p_nx=n_nx;
+    p_ny=n_ny;
+    return out;
+}
+char* sh_path(int start, int end,int *count1){
     int dist[25],parent[25];
-    int count=0,p_nx=0,p_ny=0,n_nx=0,n_ny=0,weight=1,u=0,v=0,i=0,j=0;
+    int count=0,turn_count=0,current=0,length=0,weight=1,u=0,v=0,i=0,j=0;
     int included[25];
+    int *p;
     int adj[4][2]={{0,0},{0,0},{0,0},{0,0}};
+    char dir,*path;
+    p_nx=0,p_ny=0,n_nx=0,n_ny=0;
     for(i=0;i<25;i++){
         dist[i]=INF;
         included[i]=FALSE;
@@ -74,20 +163,57 @@ void sh_path(int start, int end){
             }
         }
     }
-    for(int i=0;i<25;i++)
-        printf("%d  %d\n",i,parent[i]);
+
+
+    p=(int*)malloc(sizeof(int));
+    current=end;
+    p[0]=current;
+    while(current!=start){
+    length++;
+    current=parent[current];
+    p=(int*)realloc(p,((length+1)*sizeof(int)));
+    p[length]=current;
+    }
+
+    for(i=length;i>=0;i--)
+    printf("%d\n",p[i]);
+
+    p_nx=-1,p_ny=0,n_nx=0,n_ny=0;// Starting with facing north
+
+    dir=rotate(p[length],p[length-1],&turn_count);
+
+    path=(char*)malloc((length+1)*sizeof(char *));
+    path[0]=dir;
+    *count1=0;
+    for(i=length-1;i>0;i--){
+    *count1+=1;
+    dir=direction(p[i],p[i-1],&turn_count);
+    path[*count1]=dir;
+    }
+    *count1+=1;
+    path[*count1]=allign(turn_count);
+    return path;
 }
 
 int main(){
-int i=0,j=0;
+int i=0,j=0,count=0;
 int *p;
 int start=1;
 int end=25;
-
+char *path;
 for(i=0;i<5;i++){
     for(j=0;j<5;j++)
     printf("%*d  ",4,grid[i][j]-1);
     printf("\n");}
-sh_path(12,4);
+path=dijkstra(1,25,&count);
+for(i=0;i<=count;i++)
+printf("%c\n",path[i]);
 return 0;
+}
+char* dijkstra(int start,int end,int *count){
+char *path;
+start=transf[start];
+end=transf[end];
+path=sh_path(start,end,count);
+return path;
 }
