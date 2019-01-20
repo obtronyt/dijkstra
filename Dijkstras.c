@@ -175,8 +175,8 @@ char* sh_path(int start, int end,int *count1){
     p[length]=current;
     }
 
-    for(i=length;i>=0;i--)
-    printf("%d\n",p[i]);
+//    for(i=length;i>=0;i--)
+//    printf("%d\n",p[i]);
 
     p_nx=-1,p_ny=0,n_nx=0,n_ny=0;// Starting with facing north
 
@@ -192,26 +192,35 @@ char* sh_path(int start, int end,int *count1){
     }
     *count1+=1;
     path[*count1]=allign(turn_count);
+    free(p);
     return path;
 }
 
-int main(){
-int i=0,j=0,count=0;
-int *p;
-int start=1;
-int end=25;
-char *path;
-for(i=0;i<5;i++){
-    for(j=0;j<5;j++)
-    printf("%*d  ",4,grid[i][j]-1);
-    printf("\n");}
-path=dijkstra(1,25,&count);
-for(i=0;i<=count;i++)
-printf("%c\n",path[i]);
-return 0;
-}
+//int main(){
+//int i=0,j=0,count=0;
+//int *p;
+//int start=1;
+//int end=25;
+//char *path;
+//for(i=0;i<5;i++){
+//    for(j=0;j<5;j++)
+//    printf("%*d  ",4,grid[i][j]-1);
+//    printf("\n");}
+//path=dijkstra(1,25,&count);
+//for(i=0;i<=count;i++)
+//printf("%c\n",path[i]);
+//return 0;
+//}
 char* dijkstra(int start,int end,int *count){
+
 char *path;
+int i=0,j=0,m=21;
+for(i=0;i<5;i++){
+    for(j=m;j<m+5;j++)
+        printf("%*d",4,j);
+    printf("\n");
+    m=m-5;
+}
 start=transf[start];
 end=transf[end];
 path=sh_path(start,end,count);
